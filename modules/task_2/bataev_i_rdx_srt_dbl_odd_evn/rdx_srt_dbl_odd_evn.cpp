@@ -187,24 +187,27 @@ void bldNet(const std::vector<int>& parts, std::vector<Comparator>* comprtrs) {
 
 // in the 1-st part put smaller elems, in the 2-nd part larger elems
 // (the result of each part will be placed in the "opposite" buffer for this part!)
-void compExch(double** part1, double** part2, double** tmpPart1, double** tmpPart2, int sizePart) {
-    for (int i = 0, j = 0, k = 0; k < sizePart; k++) {
-        if ((*part1)[i] < (*part2)[j])
-            (*tmpPart1)[k] = (*part1)[i++];
-        else
-            (*tmpPart1)[k] = (*part2)[j++];
+void compExch(double** part1, double** part2, double** tmpPart1, double** tmpPart2, int sizePart, bool isFirstPart) {
+    if (isFirstPart) {
+        for (int i = 0, j = 0, k = 0; k < sizePart; k++)
+            if ((*part1)[i] < (*part2)[j])
+                (*tmpPart1)[k] = (*part1)[i++];
+            else
+                (*tmpPart1)[k] = (*part2)[j++];
+    } else {
+        for (int i = sizePart - 1, j = sizePart - 1, k = sizePart - 1; k >= 0; k--)
+            if ((*part2)[i] > (*part1)[j])
+                (*tmpPart2)[k] = (*part2)[i--];
+            else
+                (*tmpPart2)[k] = (*part1)[j--];
     }
 
-    for (int i = sizePart - 1, j = sizePart - 1, k = sizePart - 1; k >= 0; k--) {
-        if ((*part2)[i] > (*part1)[j])
-            (*tmpPart2)[k] = (*part2)[i--];
-        else
-            (*tmpPart2)[k] = (*part1)[j--];
+    #pragma omp barrier
+    if (isFirstPart) {
+        // swap ptrs (inside ptrs)
+        std::swap(*tmpPart1, *part1);
+        std::swap(*tmpPart2, *part2);
     }
-
-    // swap ptrs (inside ptrs)
-    std::swap(*tmpPart1, *part1);
-    std::swap(*tmpPart2, *part2);
 }
 
 // all "numParts" parts must be sorted and the same size "sizePart"
@@ -231,11 +234,14 @@ void oddEvnMerge(std::vector<double>* buf, std::vector<double>* tmpBuf, int numP
 
     // use this network to merge these parts
     for (int i = 0; i < steps.size(); ++i) {
-        #pragma omp parallel for num_threads(steps[i].size())
-        for (int j = 0; j < steps[i].size(); ++j)
-            compExch(&(partsPtrs[steps[i][j].part1]), &(partsPtrs[steps[i][j].part2]),
-                        &(tmpPartsPtrs[steps[i][j].part1]), &(tmpPartsPtrs[steps[i][j].part2]), sizePart);
+        #pragma omp parallel num_threads(steps[i].size() * 2)
+        {
+            int tid = omp_get_thread_num();
+            compExch(&(partsPtrs[steps[i][tid/2].part1]), &(partsPtrs[steps[i][tid/2].part2]),
+                         &(tmpPartsPtrs[steps[i][tid/2].part1]), &(tmpPartsPtrs[steps[i][tid/2].part2]),
+                                                                                            sizePart, tid%2);
             // compare-exchange for each set of comparators from the sorting network
+        }
     }
 
     // if partPtr points to part of tmpBuf copy this part to buf

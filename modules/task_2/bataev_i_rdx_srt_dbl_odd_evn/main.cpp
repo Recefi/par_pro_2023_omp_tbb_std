@@ -83,6 +83,28 @@ TEST(Parallel, Test_RadixSort_OddEvenMerge_3) {
     ASSERT_EQ(v1, v2);
 }
 
+// TEST(Parallel, Test_RadixSort_OddEvenMerge_4) {
+//     const int size = 1000000; const double left = -100000.0; const double right = 100000.0;
+//     std::vector<double> v1 = getRandomVector(size, left, right);
+//     std::vector<double> v2(v1);
+
+//     parRdxSrt(&v1, size, 8);
+
+//     std::sort(v2.begin(), v2.end());
+//     ASSERT_EQ(v1, v2);
+// }
+
+// TEST(Parallel, Test_RadixSort_OddEvenMerge_5) {
+//     const int size = 10000000; const double left = -100000.0; const double right = 100000.0;
+//     std::vector<double> v1 = getRandomVector(size, left, right);
+//     std::vector<double> v2(v1);
+
+//     parRdxSrt(&v1, size, 8);
+
+//     std::sort(v2.begin(), v2.end());
+//     ASSERT_EQ(v1, v2);
+// }
+
 TEST(Parallel, Test_AlreadySorted) {
     const int size = 6;
     std::vector<double> v1 = { -6121.59, -5547.74, -3844.54, -3275.25, 3760.91, 4208.38 };
