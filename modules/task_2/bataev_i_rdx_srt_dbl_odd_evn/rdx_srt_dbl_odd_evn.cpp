@@ -188,22 +188,21 @@ void bldNet(const std::vector<int>& parts, std::vector<Comparator>* comprtrs) {
 // in the 1-st part put smaller elems, in the 2-nd part larger elems
 // (the result of each part will be placed in the "opposite" buffer for this part!)
 void compExch(double** part1, double** part2, double** tmpPart1, double** tmpPart2, int sizePart) {
-    #pragma omp parallel num_threads(2) 
+    #pragma omp parallel num_threads(2)
     {
-        if (omp_get_thread_num() == 0)
-            for (int i = 0, j = 0, k = 0; k < sizePart; k++) {
+        if (omp_get_thread_num() == 0) {
+            for (int i = 0, j = 0, k = 0; k < sizePart; k++)
                 if ((*part1)[i] < (*part2)[j])
                     (*tmpPart1)[k] = (*part1)[i++];
                 else
                     (*tmpPart1)[k] = (*part2)[j++];
-            }
-        else
-            for (int i = sizePart - 1, j = sizePart - 1, k = sizePart - 1; k >= 0; k--) {
+        } else {
+            for (int i = sizePart - 1, j = sizePart - 1, k = sizePart - 1; k >= 0; k--)
                 if ((*part2)[i] > (*part1)[j])
                     (*tmpPart2)[k] = (*part2)[i--];
                 else
                     (*tmpPart2)[k] = (*part1)[j--];
-            }
+        }
     }
 
     // swap ptrs (inside ptrs)
