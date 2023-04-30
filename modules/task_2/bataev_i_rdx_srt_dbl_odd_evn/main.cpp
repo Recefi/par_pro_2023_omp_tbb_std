@@ -84,6 +84,24 @@ TEST(Parallel, Test_RadixSort_OddEvenMerge_3) {
 }
 
 TEST(Parallel, Test_RadixSort_OddEvenMerge_4) {
+    const int size = 1000000; const double left = -100000.0; const double right = 100000.0;
+    std::vector<double> v1 = getRandomVector(size, left, right);
+    std::vector<double> v2(v1);
+
+    parRdxSrt(&v1, size, 8);
+    // sorting network that was built and used:
+    // Comparators: [(0, 1), (2, 3), (0, 2), (1, 3), (1, 2), (4, 5),
+    //               (6, 7), (4, 6), (5, 7), (5, 6), (0, 4), (2, 6),
+    //               (2, 4), (1, 5), (3, 7), (3, 5), (1, 2), (3, 4), (5, 6)]
+    // Steps: [{(0, 1), (2, 3), (4, 5), (6, 7)}, {(0, 2), (1, 3), (4, 6), (5, 7)},
+    //         {(1, 2), (5, 6), (0, 4), (3, 7)}, {(2, 6), (1, 5)},
+    //         {(2, 4), (3, 5)}, {(1, 2), (3, 4), (5, 6)}]
+
+    std::sort(v2.begin(), v2.end());
+    ASSERT_EQ(v1, v2);
+}
+
+TEST(Parallel, Test_RadixSort_OddEvenMerge_5) {
     const int size = 10000000; const double left = -100000.0; const double right = 100000.0;
     std::vector<double> v1 = getRandomVector(size, left, right);
     std::vector<double> v2(v1);
