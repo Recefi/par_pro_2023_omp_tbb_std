@@ -238,7 +238,8 @@ void oddEvnMerge(std::vector<double>* buf, std::vector<double>* tmpBuf, int numP
         {
             int tid = omp_get_thread_num();
             compExch(&(partsPtrs[steps[i][tid/2].part1]), &(partsPtrs[steps[i][tid/2].part2]),
-                         &(tmpPartsPtrs[steps[i][tid/2].part1]), &(tmpPartsPtrs[steps[i][tid/2].part2]), sizePart, tid%2);
+                         &(tmpPartsPtrs[steps[i][tid/2].part1]), &(tmpPartsPtrs[steps[i][tid/2].part2]),
+                                                                                            sizePart, tid%2);
             // compare-exchange for each set of comparators from the sorting network
         }
     }
